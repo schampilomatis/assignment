@@ -1,0 +1,12 @@
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+#for $model in $model_list
+from models import ${model.name}
+#end for
+
+#for $model in $model_list
+class ${model.name}Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = ${model.name}
+
+#end for

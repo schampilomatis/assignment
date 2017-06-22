@@ -1,0 +1,39 @@
+package ${packageName}.database;
+
+
+import android.content.UriMatcher;
+import android.net.Uri;
+
+/**
+ * This file was generated, don't edit here!
+ */
+
+public class ContentDescriptor {
+    public static final String AUTHORITY = "${packageName}.database.DatabaseContentProvider";
+
+    private static final Uri BASE_URI = Uri.parse("content://"
+            + AUTHORITY);
+
+    public static final UriMatcher URI_MATCHER = buildUriMatcher();
+
+    private ContentDescriptor() {
+        super();
+    }
+
+    public static void init() {
+        #for $model in $models
+        ${model.name}Descriptor.init();
+        #end for
+    }
+
+    private static UriMatcher buildUriMatcher() {
+        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        #for $model in $models
+
+        // ${model.name}
+        matcher.addURI(AUTHORITY, ${model.name}Descriptor.PATH, ${model.name}Descriptor.PATH_TOKEN);
+        matcher.addURI(AUTHORITY, ${model.name}Descriptor.PATH_FOR_ID, ${model.name}Descriptor.PATH_FOR_ID_TOKEN);
+        #end for
+        return matcher;
+    }${modelDescriptors}
+}

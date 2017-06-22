@@ -1,0 +1,190 @@
+package ${packageName}.database;
+
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
+import android.text.TextUtils;
+
+import ${packageName}.R;
+
+public class DatabaseContentProvider extends ContentProvider {
+
+    private DatabaseHelper mDataBaseHelper;
+
+    @Override
+    public boolean onCreate() {
+        init();
+        return true;
+    }
+
+    public void reset() {
+        init();
+    }
+
+    public void init() {
+        if (null != mDataBaseHelper) {
+            mDataBaseHelper.close();
+            mDataBaseHelper = null;
+        }
+        mDataBaseHelper = new DatabaseHelper(getContext(), getRawResource());
+        ContentDescriptor.init();
+    }
+
+    /**
+     * Override this method to change your raw resource
+     * By default we assume 'database.sqlite' is present in the res/raw folder
+     *
+     */
+    protected int getRawResource() {
+        return R.raw.database;
+    }
+
+    @Override
+    public String getType(Uri uri) {
+        final int match = ContentDescriptor.URI_MATCHER.match(uri);
+        switch (match) {
+            #for $model in $models
+
+            // ${model.name}
+            case ContentDescriptor.${model.name}Descriptor.PATH_TOKEN:
+                return ContentDescriptor.${model.name}Descriptor.CONTENT_TYPE_DIR;
+            case ContentDescriptor.${model.name}Descriptor.PATH_FOR_ID_TOKEN:
+                return ContentDescriptor.${model.name}Descriptor.CONTENT_TYPE_ITEM;
+            #end for
+            default:
+                throw new UnsupportedOperationException("URI " + uri
+                        + " is not supported.");
+        }
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+        final int match = ContentDescriptor.URI_MATCHER.match(uri);
+        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+
+        switch (match) {
+            #for $model in $models
+
+            // ${model.name}
+            case ContentDescriptor.${model.name}Descriptor.PATH_TOKEN:
+                queryBuilder.setTables(ContentDescriptor.${model.name}Descriptor.NAME);
+                break;
+            case ContentDescriptor.${model.name}Descriptor.PATH_FOR_ID_TOKEN:
+                queryBuilder.setTables(ContentDescriptor.${model.name}Descriptor.NAME);
+                queryBuilder.appendWhere(ContentDescriptor.${model.name}Descriptor.Cols._ID + "="
+                        + uri.getLastPathSegment());
+                break;
+            #end for
+
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        SQLiteDatabase db = mDataBaseHelper.getWritableDatabase();
+        Cursor cursor = queryBuilder.query(db, projection, selection,
+                selectionArgs, null, null, sortOrder);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        return cursor;
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        final int match = ContentDescriptor.URI_MATCHER.match(uri);
+        SQLiteDatabase db = mDataBaseHelper.getWritableDatabase();
+        int rowsDeleted = 0;
+        String id;
+        switch (match) {
+            #for $model in $models
+
+            // ${model.name}
+            case ContentDescriptor.${model.name}Descriptor.PATH_TOKEN:
+                rowsDeleted = db.delete(ContentDescriptor.${model.name}Descriptor.NAME, selection,
+                        selectionArgs);
+                break;
+            case ContentDescriptor.${model.name}Descriptor.PATH_FOR_ID_TOKEN:
+                id = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsDeleted = db.delete(ContentDescriptor.${model.name}Descriptor.NAME,
+                            ContentDescriptor.${model.name}Descriptor.Cols._ID + "=" + id,
+                            null);
+                } else {
+                    rowsDeleted = db.delete(ContentDescriptor.${model.name}Descriptor.NAME,
+                            ContentDescriptor.${model.name}Descriptor.Cols._ID + "=" + id
+                                    + " and " + selection,
+                            selectionArgs);
+                }
+                break;
+
+            #end for
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsDeleted;
+    }
+
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        final int match = ContentDescriptor.URI_MATCHER.match(uri);
+        SQLiteDatabase db = mDataBaseHelper.getWritableDatabase();
+        long id = 0;
+        switch (match) {
+            #for $model in $models
+
+            // ${model.name}
+            case ContentDescriptor.${model.name}Descriptor.PATH_TOKEN:
+                id = db.insert(ContentDescriptor.${model.name}Descriptor.NAME, null, values);
+                break;
+            #end for
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return Uri.parse(ContentDescriptor.${model.name}Descriptor.PATH + "/" + id);
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection,
+                      String[] selectionArgs) {
+        final int match = ContentDescriptor.URI_MATCHER.match(uri);
+        SQLiteDatabase db = mDataBaseHelper.getWritableDatabase();
+        int rowsUpdated = 0;
+        String id;
+        switch (match) {
+            #for $model in $models
+
+            // ${model.name}
+            case ContentDescriptor.${model.name}Descriptor.PATH_TOKEN:
+                rowsUpdated = db.update(ContentDescriptor.${model.name}Descriptor.NAME, values, selection, selectionArgs);
+                break;
+            case ContentDescriptor.${model.name}Descriptor.PATH_FOR_ID_TOKEN:
+                id = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsUpdated = db.update(ContentDescriptor.${model.name}Descriptor.NAME,
+                            values,
+                            ContentDescriptor.${model.name}Descriptor.Cols._ID + "=" + id,
+                            null);
+                } else {
+                    rowsUpdated = db.update(ContentDescriptor.${model.name}Descriptor.NAME,
+                            values,
+                            ContentDescriptor.${model.name}Descriptor.Cols._ID + "=" + id
+                                    + " and "
+                                    + selection,
+                            selectionArgs);
+                }
+                break;
+
+            #end for
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsUpdated;
+    }
+
+
+}

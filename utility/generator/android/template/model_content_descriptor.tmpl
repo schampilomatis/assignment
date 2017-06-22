@@ -1,0 +1,25 @@
+
+    public static class ${model.name}Descriptor {
+        public static final String PATH = "${model.name_lower}";
+        public static final String PATH_FOR_ID = "${model.name_lower}/#";
+        public static final int PATH_TOKEN = ${model.counter}; //Unique number among tables
+        public static final int PATH_FOR_ID_TOKEN = PATH_TOKEN + 1; //Unique number tables
+        public static final int LOADER_ID = PATH_FOR_ID_TOKEN + 1; //Unique number tables
+        public static final String NAME = PATH;
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH).build();
+        public static final Uri CONTENT_FOR_ID_URI = BASE_URI.buildUpon().appendPath(PATH_FOR_ID).build();
+        public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/" + PATH;
+        public static final String CONTENT_TYPE_ITEM = "vnd.android.cursor.item/" + PATH;
+
+        public static class Cols {
+            #for $field in $model.fields
+            public static final String ${field.name_all_caps} = "${field.name}";
+            #end for
+        }
+
+        public static String[] PROJECTION;
+
+        public static void init() {
+            PROJECTION = new String[]{${model.projection}};
+        }
+    }

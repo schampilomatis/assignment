@@ -1,0 +1,75 @@
+{% load static %}
+<html lang="nl-NL">
+
+<head>
+		<meta charset="UTF-8">
+		<title>XS2</title>
+		<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+		<header>
+				<div class="logo">
+						<img  src="{% static 'img/xs2.png' %}" alt="logo 2ml"></div>
+				<div class="label">
+				</div>
+		</header>
+		<main>
+				<div class="wrapper">
+						<section class="nieuw">
+							<div>
+								<h1>New</h1>
+								<p>{{ ticket_summaries.new }}</p>
+							</div>
+						</section>
+						<section class="open">
+							<div>
+								<h1>Open</h1>
+								<p>{{ticket_summaries.open}}</p>
+							</div>
+						</section>
+
+						<section class="buiten_deadline">
+							<div>
+								<h1>Out of deadline</h1>
+								<p>{{ ticket_summaries.over_deadline }} </p>
+							</div>
+						</section>
+
+						<section class="avg_rating">
+							<div>
+								<h1>Live Rating</h1>
+								<p>{{ticket_summaries.rating_average|floatformat:1 }}</p>
+							</div>
+						</section>
+
+            <div class="ticket_list">
+              <h1>Open Tickets</h1>
+              <table>
+                <thead>
+                <th>
+                  Person
+                </th>
+                <th>
+                  Description
+                </th>
+                </thead>
+                <tbody>
+                {% for ticket in tickets %}
+                <tr>
+
+                  <td>{{ticket.assigned_to_label}}</td>
+                  <td>{{ticket.description}}</td>
+
+                </tr>
+                 {% endfor %}
+                </tbody>
+              </table>
+
+            </div>
+				</div>
+		</main>
+		<script src="{% static 'js/xps.js' %}"></script>
+</body>
+
+</html>

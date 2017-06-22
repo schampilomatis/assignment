@@ -1,0 +1,9 @@
+import views
+from django.conf.urls import patterns, url
+
+urlpatterns = patterns('',
+    #for $model in $model_list
+    url(r'^${model.name.lower()}s/$', views.${model.name}View.as_view(), name='${model.name.lower()}-list'),
+    url(r'^${model.name.lower()}s/(?P<pk>[\d]+)/$', views.${model.name}InstanceView.as_view(), name='${model.name.lower()}-instance'),
+    #end for
+)

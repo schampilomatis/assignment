@@ -1,0 +1,100 @@
+from django.contrib import admin
+from django.contrib.auth import get_user_model
+#for $model in $model_list
+from models import ${model.name}
+#end for
+
+#for $model in $model_list
+#if not 'abstract' in $model
+admin.site.register(${model.name})
+#end if
+
+#if 'custom_user' in $model and $model.custom_user
+class CustomUserCreationForm(UserCreationForm):
+    def clean_username(self):
+        # Since User.username is unique, this check is redundant,
+        # but it sets a nicer error message than the ORM. See #13147.
+        username = self.cleaned_data["username"]
+        try:
+            get_user_model()._default_manager.get(username=username)
+        except get_user_model().DoesNotExist:
+            return username
+        raise forms.ValidationError(self.error_messages['duplicate_username'])
+
+    class Meta(UserCreationForm.Meta):
+        model = get_user_model()
+        widgets = {
+            'gender': admin.widgets.AdminTextareaWidget
+        }
+
+class CustomUserForm(UserChangeForm):
+    class Meta:
+        model = get_user_model()
+        widgets = {
+            'password': forms.PasswordInput()
+        }
+
+class CustomUserAdmin(UserAdmin, GeoModelAdmin):
+    form = CustomUserForm
+    add_form = CustomUserCreationForm
+
+    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 
+        'dateofbirth', 'email', 'role', 'is_active', 'is_superuser', 
+        'date_joined')
+    #list_filter = ('is_admin',)
+    fieldsets = (
+        (_('Personal info'), {'fields': ('username', 'password', 'first_name', 'last_name', 'email', 
+                                        'dateofbirth', 'gender',
+                               'avatar', 'backgroundImage'
+                               )}),
+        (_('Permissions'), {'fields': ('role', 'is_active',
+                                      )}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('situation'), {'fields': (  'place' ,'coordinates', )}),
+    )
+    
+    
+    readonly_fields = ('dateofbirth', 'last_login', 'date_joined',)
+    
+
+    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
+    # overrides get_fieldsets to use this attribute when creating a user.
+    
+    #add_fieldsets = fieldsets
+        
+    
+    search_fields = ('email',)
+    ordering = ('email',)
+    filter_horizontal = ()
+
+    def changelist_view(self, request, extra_context=None):
+        # if not request.user.role == CustomUser.ADMIN:
+        #    return HttpResponseRedirect(reverse('admin:index'))
+        return super(self.__class__, self).changelist_view(request, extra_context)
+
+    def add_view(self, request, form_url='', extra_context=None):
+        if not request.user.role in [CustomUser.ADMIN]:
+            return HttpResponseRedirect(reverse('admin:index'))
+        return super(self.__class__, self).add_view(request, form_url, extra_context)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        # if not request.user.role == CustomUser.ADMIN:
+        #    return HttpResponseRedirect(reverse('admin:index'))
+        return super(self.__class__, self).change_view(request, object_id, form_url, extra_context)
+
+class BlockedAdmin(admin.ModelAdmin):
+    class Meta:
+        model = BlockedUser
+        
+    list_display = ('blocked', 'blocker')
+    ordering = ('blocked',)
+    search_fields = ('blocked__username',)
+        
+
+admin.site.register(${model.name}, CustomUserAdmin)
+#end if
+#end for
+
+
+
+

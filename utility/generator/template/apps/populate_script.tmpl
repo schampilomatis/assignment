@@ -1,0 +1,9 @@
+from autofixture import AutoFixture
+from ${app_name}.models import *
+from xs2auth.models import UserWithEmail
+
+AutoFixture(UserWithEmail).create(20)
+
+#for $model in $model_list
+AutoFixture(${model.name}).create(20)
+#end for

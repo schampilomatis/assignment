@@ -1,0 +1,48 @@
+import logging
+from django.shortcuts import render
+from django.contrib.auth import get_user_model, authenticate
+from rest_framework.decorators import api_view
+from befw.utils import JSONResponse
+from rest_framework import generics
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+import serializers
+#for $model in $model_list
+from models import ${model.name}
+#end for
+
+User = get_user_model()
+logger = logging.getLogger('xs2logger.requests')
+
+
+#for $model in $model_list
+class ${model.name}View(generics.ListCreateAPIView):
+    """
+    Returns a list of all ${model.name}s.
+    """
+    model = ${model.name}
+    serializer_class = serializers.${model.name}Serializer
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the ${model.name}
+        for the currently authenticated user.
+        """
+        return ${model.name}.objects.all()
+
+class ${model.name}InstanceView(generics.RetrieveAPIView, generics.UpdateAPIView):
+    """
+    Returns a list of all ${model.name}s.
+    """
+    model = ${model.name}
+    serializer_class = serializers.${model.name}Serializer
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases for
+        the user as determined by the username portion of the URL.
+        """
+        id = self.kwargs['pk']
+        return ${model.name}.objects.filter(id=id)
+
+#end for

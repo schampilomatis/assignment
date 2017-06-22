@@ -1,0 +1,75 @@
+{% load static %}
+<html lang="nl-NL">
+
+<head>
+		<meta charset="UTF-8">
+		<title>XS2</title>
+		<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+
+<style>
+
+</style>
+
+
+<div class="box beoordeling">
+<h2>Laatste beoordelingen</h2>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <th>Datum</th>
+      <th>Score</th>
+      <th>Feedback</th>
+    </tr>
+    {% for rating in recent_ratings %}
+      <tr>
+        <td>{{rating.date}}</td>
+        <td>{{rating.rating}}</td>
+        <td>{{rating.comments | default:""}}</td>
+      </tr>
+    {% endfor %}
+
+</table>
+</div>
+
+
+
+<div class="box waardering">
+<h2>Waardering per maand</h2>
+
+
+<div class="bargraph" style= "width: 390px;">
+  <ul class="bars">
+    {% for rating in monthly_ratings %}
+
+      <li class="bar{{forloop.counter}} " style="height: {{rating.percentage}}px;">{{rating.rating}}</li>
+
+    {% endfor %}
+
+  </ul>
+  <ul class="label">
+    {% for rating in monthly_ratings %}
+
+      <li>{{rating.month_abbr}}</li>
+
+    {% endfor %}
+
+  </ul>
+  <ul class="y-axis">
+    <li>5</li>
+    <li>4</li>
+    <li>3</li>
+    <li>2</li>
+    <li>1</li>
+    <li>0</li>
+  </ul>
+ <ul class="y-axis2">
+    <li>4.5</li>
+    <li>3.5</li>
+    <li>2.5</li>
+    <li>1.5</li>
+    <li>0.5</li>
+  </ul>
+
+</div>
+</div>
